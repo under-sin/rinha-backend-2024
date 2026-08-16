@@ -29,7 +29,9 @@ final class ValidationExceptionListener
         }
 
         $event->setResponse(new JsonResponse(
-            ['errors' => $errors],
+            [
+                'errors' => $errors
+            ],
             JsonResponse::HTTP_UNPROCESSABLE_ENTITY,
         ));
     }

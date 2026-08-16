@@ -12,22 +12,43 @@ final class ClienteRepository {
     }
 
     // php permite union types.
-    public function buscarPorIdParaAtualizacao(int $clienteId): array|false {
+    public function buscarPorId(int $clienteId): array|false {
 
         // fetchAssociative retorna um array associativo com os dados do cliente, ou false se não encontrar.
         return $this->connection->fetchAssociative(
-            'SELECT * FROM clientes 
-                WHERE id = :id
-                FOR UPDATE',
+            'SELECT * FROM clientes WHERE id = :id',
             ['id' => $clienteId]
         );
     }
 
-    public function atualizarSaldo(int $clienteId, int $novoSaldo): void {
-        $this->connection->update(
-            'clientes',
-            ['saldo' => $novoSaldo],
-            ['id' => $clienteId]
+    public function debitar(int $clienteId, int $valor): array|false {
+        return $this->connection->fetchAssociative(
+            '
+                UPDATE clientes 
+                SET saldo = saldo - :valor
+                WHERE id = :id
+                    AND (saldo - :valor) >= -limite
+                RETURNING saldo, limite
+            ',
+            [
+                'id' => $clienteId,
+                'valor' => $valor,
+            ]
+        );
+    }
+
+    public function creditar(int $clienteId, int $valor): array|false {
+        return $this->connection->fetchAssociative(
+            '
+                UPDATE clientes 
+                SET saldo = saldo + :valor
+                WHERE id = :id
+                RETURNING saldo, limite
+            ',
+            [
+                'id' => $clienteId,
+                'valor' => $valor,
+            ]
         );
     }
 }

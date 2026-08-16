@@ -4,6 +4,8 @@ namespace App\Service;
     
 use App\DTO\CriarTransacaoRequest;
 use App\Enum\TipoTransacao;
+use App\Exception\ClienteNaoEncontradoException;
+use App\Exception\LimiteInsuficienteException;
 use App\Repository\ClienteRepository;
 use App\Repository\TransacaoRepository;
 use Doctrine\DBAL\Connection;
@@ -22,26 +24,12 @@ final class TransacaoService {
         $this->connection->beginTransaction();
 
         try {
-            $cliente = $this->clienteRepository->buscarPorIdParaAtualizacao($clienteId);
+            
+            $cliente = $this->executarTransacao($clienteId, $transacao);
 
             if ($cliente === false) {
-                throw new \Exception('Cliente não encontrado');
+                $this->tratarFalha($clienteId);
             }
-
-            $novoSaldo = $this->calculaSaldo(
-                (int) $cliente['saldo'],
-                $transacao->valor,
-                $transacao->tipo
-            );
-
-            if ($novoSaldo < -$cliente['limite']) {
-                throw new \Exception('Limite insuficiente');
-            }
-
-            $this->clienteRepository->atualizarSaldo(
-                $clienteId, 
-                $novoSaldo
-            );
 
             $this->transacaoRepository->insert(
                 $clienteId,
@@ -54,7 +42,7 @@ final class TransacaoService {
 
             return [
                 'limite' => $cliente['limite'],
-                'saldo' => $novoSaldo,
+                'saldo' => $cliente['saldo'],
             ];
         } catch (\Throwable $th) {
             
@@ -63,15 +51,28 @@ final class TransacaoService {
         }
     }
 
-    private function calculaSaldo(
-        int $saldoAtual, 
-        int $valorTransacao, 
-        TipoTransacao $tipoTransacao
-    ): int {
-        if ($tipoTransacao === TipoTransacao::CREDITO) {
-            return $saldoAtual + $valorTransacao;
+    private function executarTransacao(
+        int $clienteId, 
+        CriarTransacaoRequest $transacao
+    ): array|false {
+        $resultado = match ($transacao->tipo) {
+            TipoTransacao::CREDITO => $this->clienteRepository->creditar($clienteId, $transacao->valor),
+            TipoTransacao::DEBITO => $this->clienteRepository->debitar($clienteId, $transacao->valor),
+        };
+
+        return $resultado;
+    }
+
+    private function tratarFalha(int $clienteId): never {
+        $cliente = $this->clienteRepository->buscarPorId($clienteId);
+
+        if ($cliente === false) {
+            throw new ClienteNaoEncontradoException("Cliente não encontrado.");
         }
 
-        return $saldoAtual - $valorTransacao;
+        error_log("Excedeu o limite do cliente {$clienteId}. Saldo: {$cliente['saldo']}, Limite: {$cliente['limite']}");
+
+        // daria para colocar um redis ou outro mecanismo de cache para bloquear o cliente por um tempo, evitando que ele tente novamente e continue a gerar exceções quando o limite estiver excedido. 
+        throw new LimiteInsuficienteException("Transação não permitida. Limite excedido.");
     }
 }

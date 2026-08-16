@@ -26,4 +26,21 @@ final class TransacaoRepository {
             ]
         );
     }
+
+    public function buscarUltimosPorClienteId(int $clienteId): array {
+        return $this->connection->fetchAllAssociative(
+            'SELECT 
+                valor,
+                tipo,
+                descricao,
+                realizado_em
+             FROM transacoes
+                WHERE cliente_id = :cliente_id 
+                ORDER BY realizado_em DESC, id DESC
+                LIMIT 10',
+            [
+                'cliente_id' => $clienteId
+            ]
+        );
+    }
 }
