@@ -76,3 +76,23 @@ p99 250ms
 ↓
 "99 de cada 100 terminaram em até 250ms;
 a cauda está bem mais lenta"
+
+`docker stats` para ver o consumo de CPU e memória dos containers em tempo real.
+NAME          CPU %     MEM USAGE / LIMIT
+
+api1          87%       78MB / 100MB
+api2          91%       81MB / 100MB
+postgres      65%       240MB / 320MB
+nginx          3%       8MB / 30MB
+
+Quando os recursos chegam aperto de 100% as requests começam a esperar, com isso as filas aumentam, latência aumenta, p95 e p99 aumentam, e o throughput cai.
+
+Subir a primeira versão para ter a baseline de performance, e depois ir fazendo otimizações e comparando com a baseline.
+
+### Teste de concorrência com 10, 50 e 100 requisições concorrentes, medindo o throughput (req/s), latência p95 e p99, e consumo de CPU da API e do banco de dados.
+
+| Concorrência | req/s | p95 | p99 | CPU API | CPU DB |
+| -----------: | ----: | --: | --: | ------: | -----: |
+|           10 |       |     |     |         |        |
+|           50 |       |     |     |         |        |
+|          100 |       |     |     |         |        |

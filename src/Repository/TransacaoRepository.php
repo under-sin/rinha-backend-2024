@@ -33,10 +33,10 @@ final class TransacaoRepository {
                 valor,
                 tipo,
                 descricao,
-                realizado_em
+                realizada_em
              FROM transacoes
                 WHERE cliente_id = :cliente_id 
-                ORDER BY realizado_em DESC, id DESC
+                ORDER BY realizada_em DESC, id DESC
                 LIMIT 10',
             [
                 'cliente_id' => $clienteId
