@@ -96,3 +96,7 @@ Subir a primeira versão para ter a baseline de performance, e depois ir fazendo
 |           10 |       |     |     |         |        |
 |           50 |       |     |     |         |        |
 |          100 |       |     |     |         |        |
+
+
+### FrankenPHP
+FrankenPHP é um servidor web que combina o Caddy e o PHP-FPM em um único processo. Ele é projetado para simplificar a implantação de aplicativos PHP, oferecendo uma configuração mais fácil e melhor desempenho em comparação com a configuração tradicional de Caddy + PHP-FPM.

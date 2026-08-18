@@ -1,0 +1,11 @@
+{
+    auto_https off
+}
+
+:{$HTTP_PORT:8080} {
+    root * /app/public
+
+    php_server {
+        worker ./public/index.php
+    }
+}

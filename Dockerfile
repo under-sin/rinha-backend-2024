@@ -1,11 +1,12 @@
-FROM php:8.4-cli
+FROM dunglas/frankenphp:php8.4
 
 WORKDIR /app
 
-RUN apt-get update \
-    && apt-get install -y libpq-dev unzip \
-    && docker-php-ext-install pdo_pgsql \
-    && rm -rf /var/lib/apt/lists/*
+RUN install-php-extensions \
+    pdo_pgsql \
+    intl \
+	zip \
+    opcache
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -20,8 +21,14 @@ RUN composer install \
 
 COPY . .
 
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
 RUN php bin/console cache:clear --env=prod
+
+# Caddyfile is used by FrankenPHP to configure the built-in Caddy web server.
+COPY Caddyfile /etc/frankenphp/Caddyfile
 
 EXPOSE 8080
 
-CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
+#CMD ["sh", "-c", "exec php -S 0.0.0.0:${HTTP_PORT:-8080} -t public"]

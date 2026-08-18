@@ -55,12 +55,27 @@ Um cliente pode ter várias transações, mas uma transação pertence a apenas 
 
 ## Ordem de versões
 
-[] API Funcionar
-[] Postgres + Transações concorrentes
-[] Concorrência correta
+[x] API Funcionar
+[x] Postgres + Transações concorrentes
+[x] Concorrência correta
 [] 2 Instâncias + load balancer
 [] Limites oficiais de CPU/Memória
 [] Redis?
 [] Gatling
 [] Profiling
 [] Otimizações
+
+---
+
+Como fazer para executar os scripts iniciais do postgres no docker-compose?
+    - Tanto o de criação do banco quanto o de inserção de dados iniciais.
+
+Qual a melhor forma de alocar os recursos de CPU e memória para o container que a aplicação vai rodar? 
+
+API1 = 0.35
+API2 = 0.35
+Postgres = 0.70
+Nginx = 0.10
+
+??
+
