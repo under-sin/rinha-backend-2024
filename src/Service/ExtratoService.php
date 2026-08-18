@@ -34,7 +34,7 @@ final class ExtratoService {
             return [
                 'saldo' => [
                     'limite' => (int) $cliente['limite'],
-                    'saldo' => (int) $cliente['saldo'],
+                    'total' => (int) $cliente['saldo'],
                     'data_extrato' => $dataExtrato,
                 ],
                 'ultimas_transacoes' => $transacoes
